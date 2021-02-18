@@ -1,5 +1,7 @@
 "use strict"
 let times=new Map()
+let days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+
 function getOverlaps(l1, l2){
     //Given two sorted arrays of time intervals, return an array of intervals of intersections of the two arrays.
     //Use two pointers
@@ -35,23 +37,7 @@ function getOverlaps(l1, l2){
     }
     return intervals;
 }
-
-function addTime(){
-    //first add time to set
-    let name = document.getElementById('name').value;
-    let startTime = document.getElementById('start-time').value;
-    let endTime = document.getElementById('end-time').value;
-    document.getElementById('name').value='';
-    document.getElementById('start-time').value='';
-    document.getElementById('end-time').value='';
-
-    if(times.has(name)){
-        times.get(name).push([parseInt(startTime),parseInt(endTime)]);
-        times.get(name).sort((a,b) => a);
-    }
-    else{
-        times.set(name,[[parseInt(startTime),parseInt(endTime)]]);
-    }
+function update(){
     let overlaps = null;
     for(let arr of times){
         if(overlaps==null){
@@ -74,7 +60,24 @@ function addTime(){
         newNode.append(textNode)
         overlapNode.append(newNode);
     }
-    
+}
+function addTime(){
+    //first add time to set
+    let name = document.getElementById('name').value;
+    let startTime = document.getElementById('start-time').value;
+    let endTime = document.getElementById('end-time').value;
+    document.getElementById('name').value='';
+    document.getElementById('start-time').value='';
+    document.getElementById('end-time').value='';
+
+    if(times.has(name)){
+        times.get(name).push([parseInt(startTime),parseInt(endTime)]);
+        times.get(name).sort((a,b) => a);
+    }
+    else{
+        times.set(name,[[parseInt(startTime),parseInt(endTime)]]);
+    }
+    update();
 }
 document.getElementById('add-time-button').addEventListener('click',addTime);
 /*
