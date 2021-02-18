@@ -56,10 +56,34 @@ function update(){
     let newNode;
     for(let arr of overlaps){
         newNode = document.createElement('p');
-        textNode = document.createTextNode('['+arr[0].toString()+', '+arr[1].toString()+']')
+        textNode = document.createTextNode('['+timeToStr(arr[0])+' - '+timeToStr(arr[1])+']')
         newNode.append(textNode)
         overlapNode.append(newNode);
     }
+}
+function timeToStr(minutes){
+    let day=Math.floor(minutes/1440);
+    minutes%=1440;
+    let hour=Math.floor(minutes/60);
+    let period;
+    if(hour>=12){
+        period='P.M.';
+    }
+    else{
+        period='A.M.';
+    }
+    hour%=12;
+    if(hour==0){
+        hour=12;
+    }
+    minutes%=60;
+    return days[day]+' '+hour.toString()+':'+minutes.toString()+' '+period;
+}
+function getTime(){
+    let startTime = document.getElementById('start-time').value;
+    let endTime = document.getElementById('end-time').value;
+    document.getElementById('start-time').value='';
+    document.getElementById('end-time').value='';
 }
 function addTime(){
     //first add time to set
