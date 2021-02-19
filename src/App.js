@@ -1,4 +1,4 @@
-//TODO: Fix new overlapping intervals
+//TODO: Fix new overlapping intervals, remove second day selector
 
 import './App.css';
 import React, { useState, useEffect } from 'react';
