@@ -6,6 +6,8 @@ import ReactDOM from 'react-dom';
 
 let DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 let DAYS_INDEX={'sunday':0,'monday':1,'tuesday':2,'wednesday':3,'thursday':4,'friday':5,'saturday':6}
+let re = /[a-zA-Z]/g;
+
 function getOverlaps(l1, l2){
   /**
    * Given two sorted arrays of time intervals, return an array of intervals of intersections of the two arrays.
@@ -171,15 +173,22 @@ function App() {
         alert('Name cannot be empty');
         return
       }
-      if (event.target.elements.startTimeHour.value<1 || event.target.elements.startTimeHour.value>12){
-        alert('Start time hour must be between 1 and 12');
+      if (parseInt(event.target.elements.startTimeHour.value)<1 || parseInt(event.target.elements.startTimeHour.value)>12 || re.test(event.target.elements.startTimeHour.value) || parseInt(event.target.elements.startTimeHour.value)!=parseFloat(event.target.elements.startTimeHour.value)){
+        alert('Start time hour must be an integer between 1 and 12');
         return
       }
-      if (event.target.elements.endTimeHour.value<1 || event.target.elements.endTimeHour.value>12){
-        alert('End time hour must be between 1 and 12');
+      if (parseInt(event.target.elements.endTimeHour.value)<1 || parseInt(event.target.elements.endTimeHour.value)>12 || re.test(event.target.elements.endTimeHour.value) || parseInt(event.target.elements.endTimeHour.value)!=parseFloat(event.target.elements.endTimeHour.value)){
+        alert('End time hour must be an integer between 1 and 12');
         return
       }
-      if (event.target.elem)
+      if (parseInt(event.target.elements.startTimeMinute.value)<0 || parseInt(event.target.elements.startTimeMinute.value)>59 || re.test(event.target.elements.startTimeMinute.value) || parseInt(event.target.elements.startTimeMinute.value)!=parseFloat(event.target.elements.startTimeMinute.value)){
+        alert('Start time minute must be an integer between 1 and 12');
+        return
+      }
+      if (parseInt(event.target.elements.endTimeMinute.value)<0 || parseInt(event.target.elements.endTimeMinute.value)>59 || re.test(event.target.elements.endTimeMinute.value) || parseInt(event.target.elements.endTimeMinute.value)!=parseFloat(event.target.elements.endTimeMinute.value)){
+        alert('End time minute must be an integer between 1 and 12');
+        return
+      }
       if (startMinutes>=endMinutes){
         alert('Start time must be later than end time');
         return
