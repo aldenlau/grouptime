@@ -1,3 +1,5 @@
+//TODO: Fix new overlapping intervals
+
 import './App.css';
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
@@ -165,13 +167,24 @@ function App() {
       let startMinutes = 1440*DAYS_INDEX[event.target.elements.startDay.value]+60*(parseInt(event.target.elements.startTimeHour.value)%12)+60*12*parseInt(event.target.elements.startPeriod.value)+parseInt(event.target.elements.startTimeMinute.value);
       let endMinutes = 1440*DAYS_INDEX[event.target.elements.endDay.value]+60*(parseInt(event.target.elements.endTimeHour.value)%12)+60*12*parseInt(event.target.elements.endPeriod.value)+parseInt(event.target.elements.endTimeMinute.value);
       let name = event.target.elements.timeName.value.toString();
+      if(name==''){
+        alert('Name cannot be empty');
+        return
+      }
+      if (event.target.elements.startTimeHour.value<1 || event.target.elements.startTimeHour.value>12){
+        alert('Start time hour must be between 1 and 12');
+        return
+      }
+      if (event.target.elements.endTimeHour.value<1 || event.target.elements.endTimeHour.value>12){
+        alert('End time hour must be between 1 and 12');
+        return
+      }
+      if (event.target.elem)
+      if (startMinutes>=endMinutes){
+        alert('Start time must be later than end time');
+        return
+      }
 
-      console.log(1440*DAYS_INDEX[event.target.elements.startDay.value]);
-      console.log(60*(event.target.elements.startTimeHour.value%12));
-      console.log(60*12*event.target.elements.startPeriod.value)
-      console.log(event.target.elements.startTimeMinute.value)
-      console.log(startMinutes);
-      
       event.target.elements.startTimeHour.value='';
       event.target.elements.startTimeMinute.value='';
       event.target.elements.endTimeHour.value='';
