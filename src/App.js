@@ -1,4 +1,4 @@
-//TODO: Fix new overlapping intervals, remove second day selector
+//TODO: Fix new overlapping intervals, remove second day selector, change time list representation to set
 
 import './App.css';
 import React, { useState, useEffect } from 'react';
@@ -94,7 +94,6 @@ function overlappingTimes(allTimes){
 }
 
 function TimeForm({onSubmitFunc}) {
-  const [handleSubmit, setHandleSubit] = useState(onSubmitFunc)
   return (
     <form id='add-time' onSubmit ={onSubmitFunc}>
         <label>Name:
@@ -150,11 +149,20 @@ function GroupTimes({list}) {
   )
 }
 
-function PersonTime({name, list}) {
+function Time({timeArr, removeFunc, i, nameToRemove}){
+  return  (
+    <div>
+      <p className = "timeBox">{timeToStr(timeArr[0])+' - '+timeToStr(timeArr[1])}</p>
+      <button type="button" className = "timeBox" onClick = {(e) => removeFunc(i, nameToRemove)}>Remove</button>
+    </div>
+  )
+}
+
+function PersonTime({name, list, removeFunction}) {
   return (
     <div className="personBox">
       <p><b>{name}</b></p>
-      {list.map(time => <p>{timeToStr(time[0])+' - '+timeToStr(time[1])}</p>)}
+      {list.map((time,index) => <Time timeArr={time} removeFunc = {removeFunction} i={index} nameToRemove = {name}/>)}
     </div>
   )
 }
@@ -213,11 +221,20 @@ function App() {
       console.log(overlaps)
     }
   }
+  function removeTime(index, name){
+    let newMap = new Map(times);
+    console.log(newMap.get(name))
+    newMap.get(name).splice(index);
+    if(newMap.get(name).length==0){
+      newMap.delete(name)
+    }
+    setTimes(newMap);
+  }
   return (
     <div className="App">
       <TimeForm onSubmitFunc={handleSubmit}/>
       <GroupTimes list={overlappingTimes(times)}/>
-      {[...times].map(sub => <PersonTime name={sub[0]} list={sub[1]}/>)}
+      {[...times].map(sub => <PersonTime name={sub[0]} list={sub[1]} removeFunction = {removeTime}/>)}
     </div>
   );
 }

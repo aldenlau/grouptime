@@ -1,7 +1,10 @@
-#add-time .time-input{
+.time-input{
   display: inline;
 }
 
+#add-time {
+  margin: 5px;
+}
 .personBox {
   border: 3px solid gray;
   margin: 5px;
@@ -14,4 +17,9 @@
   margin: 10px;
   padding: 10px;
   width: 50%;
+}
+
+.timeBox {
+  display: inline;
+  margin: 10px;
 }
