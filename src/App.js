@@ -259,7 +259,7 @@ function App() {
     event.target.elements.endTimeMinute.value='';
     event.target.elements.timeName.value='';
     
-    fetch('/add/'+current+'/'+name+'/'+startMinutes.toString()+'/'+endMinutes.toString()+'/', {
+    fetch('https://grouptime-api.herokuapp.com/add/'+current+'/'+name+'/'+startMinutes.toString()+'/'+endMinutes.toString()+'/', {
       method: 'POST'
     }).then(
       res => res.json()
@@ -275,7 +275,7 @@ function App() {
       if(event.target.elements.idStr.value==null){
         return
       }
-      fetch('/'+event.target.elements.idStr.value
+      fetch('https://grouptime-api.herokuapp.com/'+event.target.elements.idStr.value
       ).then(
         res => res.json()
       ).then(data => {
@@ -294,7 +294,7 @@ function App() {
     setTimes(newMap);
   }
   function removeServer(index, name){
-    fetch('/rm/'+current+'/'+name+'/'+times.get(name)[index][0].toString()+'/'+times.get(name)[index][1].toString()+'/', {
+    fetch('https://grouptime-api.herokuapp.com/rm/'+current+'/'+name+'/'+times.get(name)[index][0].toString()+'/'+times.get(name)[index][1].toString()+'/', {
       method: 'POST'
     }).then(
       res => res.json()
