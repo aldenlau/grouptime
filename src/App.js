@@ -1,8 +1,10 @@
-//TODO: Fix new overlapping intervals, remove second day selector, change time list representation to set
-
+//TODO: Fix new overlapping intervals, remove second day selector
+//If link = default, do locally
+//else do all updates w/ POST and update times using POST response
 import './App.css';
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+
 
 let DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 let DAYS_INDEX={'sunday':0,'monday':1,'tuesday':2,'wednesday':3,'thursday':4,'friday':5,'saturday':6}
@@ -99,17 +101,19 @@ function TimeForm({onSubmitFunc}) {
         <label>Name:
           <input type='text' id='name' name="timeName"/>
         </label>
-
-        <label>Start time: 
+        <label>
+          Day:
           <select id='start-day' name="startDay">
-            <option value="sunday">Sunday</option>
-            <option value="monday">Monday</option>
-            <option value="tuesday">Tuesday</option>
-            <option value="wednesday">Wednesday</option>
-            <option value="thursday">Thursday</option>
-            <option value="friday">Friday</option>
-            <option value="saturday">Saturday</option>
-          </select>
+              <option value="sunday">Sunday</option>
+              <option value="monday">Monday</option>
+              <option value="tuesday">Tuesday</option>
+              <option value="wednesday">Wednesday</option>
+              <option value="thursday">Thursday</option>
+              <option value="friday">Friday</option>
+              <option value="saturday">Saturday</option>
+            </select>
+        </label>
+        <label>Start time: 
           <input type='text' id='start-time' name="startTimeHour" size="2" />:
           <input type='text' id='start-time' name="startTimeMinute" size="2"/>
           <select id='start-period' name="startPeriod">
@@ -118,15 +122,6 @@ function TimeForm({onSubmitFunc}) {
           </select>
         </label>
         <label>End time: 
-          <select id='end-day' name="endDay">
-            <option value="sunday">Sunday</option>
-            <option value="monday">Monday</option>
-            <option value="tuesday">Tuesday</option>
-            <option value="wednesday">Wednesday</option>
-            <option value="thursday">Thursday</option>
-            <option value="friday">Friday</option>
-            <option value="saturday">Saturday</option>
-          </select>
           <input type='text' id='end-time' name="endTimeHour" size="2" />:
           <input type='text' id='end-time' name="endTimeMinute" size="2"/>
           <select id='start-period' name="endPeriod">
@@ -166,72 +161,169 @@ function PersonTime({name, list, removeFunction}) {
     </div>
   )
 }
-
+function SetGroup({onSubmitFunc}){
+  return (
+    <form id='group-id' onSubmit = {onSubmitFunc}>
+      <label>
+        ID
+        <input type='text' id='id-str' name="idStr"/>
+      </label>
+      <input type="submit" id = 'set-group' value="Submit" />
+    </form>
+  )
+}
 
 function App() {
-  const [times, setTimes] = useState(new Map())
-  const [overlaps, setOverlaps] = useState([])
-  function handleSubmit(event){
+  const [times, setTimes] = useState(new Map());
+  const [overlaps, setOverlaps] = useState([]);
+  const [current, setCurrent] = useState(null);
+  function submitLocal(event){
+    event.preventDefault();
+    let startMinutes = 1440*DAYS_INDEX[event.target.elements.startDay.value]+60*(parseInt(event.target.elements.startTimeHour.value)%12)+60*12*parseInt(event.target.elements.startPeriod.value)+parseInt(event.target.elements.startTimeMinute.value);
+    let endMinutes = 1440*DAYS_INDEX[event.target.elements.startDay.value]+60*(parseInt(event.target.elements.endTimeHour.value)%12)+60*12*parseInt(event.target.elements.endPeriod.value)+parseInt(event.target.elements.endTimeMinute.value);
+    let name = event.target.elements.timeName.value.toString();
+    if(name==''){
+      alert('Name cannot be empty');
+      return
+    }
+    if (parseInt(event.target.elements.startTimeHour.value)<1 || parseInt(event.target.elements.startTimeHour.value)>12 || re.test(event.target.elements.startTimeHour.value) || parseInt(event.target.elements.startTimeHour.value)!=parseFloat(event.target.elements.startTimeHour.value)){
+      alert('Start time hour must be an integer between 1 and 12');
+      return
+    }
+    if (parseInt(event.target.elements.endTimeHour.value)<1 || parseInt(event.target.elements.endTimeHour.value)>12 || re.test(event.target.elements.endTimeHour.value) || parseInt(event.target.elements.endTimeHour.value)!=parseFloat(event.target.elements.endTimeHour.value)){
+      alert('End time hour must be an integer between 1 and 12');
+      return
+    }
+    if (parseInt(event.target.elements.startTimeMinute.value)<0 || parseInt(event.target.elements.startTimeMinute.value)>59 || re.test(event.target.elements.startTimeMinute.value) || parseInt(event.target.elements.startTimeMinute.value)!=parseFloat(event.target.elements.startTimeMinute.value)){
+      alert('Start time minute must be an integer between 0 and 59');
+      return
+    }
+    if (parseInt(event.target.elements.endTimeMinute.value)<0 || parseInt(event.target.elements.endTimeMinute.value)>59 || re.test(event.target.elements.endTimeMinute.value) || parseInt(event.target.elements.endTimeMinute.value)!=parseFloat(event.target.elements.endTimeMinute.value)){
+      alert('End time minute must be an integer between 0 and 59');
+      return
+    }
+    if (startMinutes>=endMinutes){
+      alert('Start time must be later than end time');
+      return
+    }
+
+    event.target.elements.startTimeHour.value='';
+    event.target.elements.startTimeMinute.value='';
+    event.target.elements.endTimeHour.value='';
+    event.target.elements.endTimeMinute.value='';
+    event.target.elements.timeName.value='';
+    
+    let newMap = new Map(times)
+    if(newMap.has(name)){
+      newMap.get(name).push([parseInt(startMinutes),parseInt(endMinutes)]);
+      newMap.get(name).sort((a,b) => a);
+    }
+    else{
+        newMap.set(name,[[parseInt(startMinutes),parseInt(endMinutes)]]);
+    }
+    setTimes(newMap);
+  }
+  function submitServer(event){
+    event.preventDefault();
+    let startMinutes = 1440*DAYS_INDEX[event.target.elements.startDay.value]+60*(parseInt(event.target.elements.startTimeHour.value)%12)+60*12*parseInt(event.target.elements.startPeriod.value)+parseInt(event.target.elements.startTimeMinute.value);
+    let endMinutes = 1440*DAYS_INDEX[event.target.elements.startDay.value]+60*(parseInt(event.target.elements.endTimeHour.value)%12)+60*12*parseInt(event.target.elements.endPeriod.value)+parseInt(event.target.elements.endTimeMinute.value);
+    let name = event.target.elements.timeName.value.toString();
+    if(name==''){
+      alert('Name cannot be empty');
+      return
+    }
+    if (parseInt(event.target.elements.startTimeHour.value)<1 || parseInt(event.target.elements.startTimeHour.value)>12 || re.test(event.target.elements.startTimeHour.value) || parseInt(event.target.elements.startTimeHour.value)!=parseFloat(event.target.elements.startTimeHour.value)){
+      alert('Start time hour must be an integer between 1 and 12');
+      return
+    }
+    if (parseInt(event.target.elements.endTimeHour.value)<1 || parseInt(event.target.elements.endTimeHour.value)>12 || re.test(event.target.elements.endTimeHour.value) || parseInt(event.target.elements.endTimeHour.value)!=parseFloat(event.target.elements.endTimeHour.value)){
+      alert('End time hour must be an integer between 1 and 12');
+      return
+    }
+    if (parseInt(event.target.elements.startTimeMinute.value)<0 || parseInt(event.target.elements.startTimeMinute.value)>59 || re.test(event.target.elements.startTimeMinute.value) || parseInt(event.target.elements.startTimeMinute.value)!=parseFloat(event.target.elements.startTimeMinute.value)){
+      alert('Start time minute must be an integer between 0 and 59');
+      return
+    }
+    if (parseInt(event.target.elements.endTimeMinute.value)<0 || parseInt(event.target.elements.endTimeMinute.value)>59 || re.test(event.target.elements.endTimeMinute.value) || parseInt(event.target.elements.endTimeMinute.value)!=parseFloat(event.target.elements.endTimeMinute.value)){
+      alert('End time minute must be an integer between 0 and 59');
+      return
+    }
+    if (startMinutes>=endMinutes){
+      alert('Start time must be later than end time');
+      return
+    }
+
+    event.target.elements.startTimeHour.value='';
+    event.target.elements.startTimeMinute.value='';
+    event.target.elements.endTimeHour.value='';
+    event.target.elements.endTimeMinute.value='';
+    event.target.elements.timeName.value='';
+    
+    fetch('/add/'+current+'/'+name+'/'+startMinutes.toString()+'/'+endMinutes.toString()+'/', {
+      method: 'POST'
+    }).then(
+      res => res.json()
+    ).then(data => {
+      setTimes(new Map(Object.entries(data)));
+    })
+
+  }
+
+  function setServer(event){
     if(event){
       event.preventDefault();
-      let startMinutes = 1440*DAYS_INDEX[event.target.elements.startDay.value]+60*(parseInt(event.target.elements.startTimeHour.value)%12)+60*12*parseInt(event.target.elements.startPeriod.value)+parseInt(event.target.elements.startTimeMinute.value);
-      let endMinutes = 1440*DAYS_INDEX[event.target.elements.endDay.value]+60*(parseInt(event.target.elements.endTimeHour.value)%12)+60*12*parseInt(event.target.elements.endPeriod.value)+parseInt(event.target.elements.endTimeMinute.value);
-      let name = event.target.elements.timeName.value.toString();
-      if(name==''){
-        alert('Name cannot be empty');
+      if(event.target.elements.idStr.value==null){
         return
       }
-      if (parseInt(event.target.elements.startTimeHour.value)<1 || parseInt(event.target.elements.startTimeHour.value)>12 || re.test(event.target.elements.startTimeHour.value) || parseInt(event.target.elements.startTimeHour.value)!=parseFloat(event.target.elements.startTimeHour.value)){
-        alert('Start time hour must be an integer between 1 and 12');
-        return
-      }
-      if (parseInt(event.target.elements.endTimeHour.value)<1 || parseInt(event.target.elements.endTimeHour.value)>12 || re.test(event.target.elements.endTimeHour.value) || parseInt(event.target.elements.endTimeHour.value)!=parseFloat(event.target.elements.endTimeHour.value)){
-        alert('End time hour must be an integer between 1 and 12');
-        return
-      }
-      if (parseInt(event.target.elements.startTimeMinute.value)<0 || parseInt(event.target.elements.startTimeMinute.value)>59 || re.test(event.target.elements.startTimeMinute.value) || parseInt(event.target.elements.startTimeMinute.value)!=parseFloat(event.target.elements.startTimeMinute.value)){
-        alert('Start time minute must be an integer between 1 and 12');
-        return
-      }
-      if (parseInt(event.target.elements.endTimeMinute.value)<0 || parseInt(event.target.elements.endTimeMinute.value)>59 || re.test(event.target.elements.endTimeMinute.value) || parseInt(event.target.elements.endTimeMinute.value)!=parseFloat(event.target.elements.endTimeMinute.value)){
-        alert('End time minute must be an integer between 1 and 12');
-        return
-      }
-      if (startMinutes>=endMinutes){
-        alert('Start time must be later than end time');
-        return
-      }
-
-      event.target.elements.startTimeHour.value='';
-      event.target.elements.startTimeMinute.value='';
-      event.target.elements.endTimeHour.value='';
-      event.target.elements.endTimeMinute.value='';
-      event.target.elements.timeName.value='';
-      
-      let newMap = new Map(times)
-      if(newMap.has(name)){
-        newMap.get(name).push([parseInt(startMinutes),parseInt(endMinutes)]);
-        newMap.get(name).sort((a,b) => a);
-      }
-      else{
-          newMap.set(name,[[parseInt(startMinutes),parseInt(endMinutes)]]);
-      }
-      setTimes(newMap);
-      console.log(times)
-      console.log(overlaps)
+      fetch('/'+event.target.elements.idStr.value
+      ).then(
+        res => res.json()
+      ).then(data => {
+        setTimes(new Map(Object.entries(data)));
+        setCurrent(event.target.elements.idStr.value);
+      })
     }
   }
-  function removeTime(index, name){
+  function removeLocal(index, name){
     let newMap = new Map(times);
-    console.log(newMap.get(name))
+    console.log(newMap.get(name));
     newMap.get(name).splice(index);
     if(newMap.get(name).length==0){
       newMap.delete(name)
     }
     setTimes(newMap);
   }
+  function removeServer(index, name){
+    fetch('/rm/'+current+'/'+name+'/'+times.get(name)[index][0].toString()+'/'+times.get(name)[index][1].toString()+'/', {
+      method: 'POST'
+    }).then(
+      res => res.json()
+    ).then(data => {
+      setTimes(new Map(Object.entries(data)));
+    })
+
+  }
+  function handleSubmit(event){
+    if(event){
+      if(current==null){
+        submitLocal(event);
+      }
+      else{
+        submitServer(event);
+      }
+    }
+  }
+  function removeTime(index, name){
+    if(current==null){
+      removeLocal(index, name);
+    }
+    else{
+      removeServer(index, name);
+    }
+  }
   return (
     <div className="App">
+      <SetGroup onSubmitFunc={setServer} />
       <TimeForm onSubmitFunc={handleSubmit}/>
       <GroupTimes list={overlappingTimes(times)}/>
       {[...times].map(sub => <PersonTime name={sub[0]} list={sub[1]} removeFunction = {removeTime}/>)}
